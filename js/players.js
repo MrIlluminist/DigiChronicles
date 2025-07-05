@@ -5,7 +5,7 @@ var playedColors = [];
 loadDB();
 async function loadDB(){
     const sqlPromise = initSqlJs();
-    const dataPromise = fetch("./assets/data/DigiChronicles.db").then(res => res.arrayBuffer());
+    const dataPromise = fetch("https://mrilluminist.github.io/DigiChronicles/assets/data/DigiChronicles.db").then(res => res.arrayBuffer());
     const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
     db = new SQL.Database(new Uint8Array(buf));
     listPlayers();
