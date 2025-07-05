@@ -2,7 +2,7 @@ var db = null;
 loadDB();
 async function loadDB(){
     const sqlPromise = initSqlJs();
-    const dataPromise = fetch("../assets/data/DigiChronicles.db").then(res => res.arrayBuffer());
+    const dataPromise = fetch("assets/data/DigiChronicles.db").then(res => res.arrayBuffer());
     const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
     db = new SQL.Database(new Uint8Array(buf));
     listDecks();
