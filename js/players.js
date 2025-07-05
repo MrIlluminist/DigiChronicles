@@ -1,13 +1,16 @@
 var db = null;
 var player = 1;
+const deckColors = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Purple', 'White', 'Multicolor'];
+var playedColors = [];
 loadDB();
 async function loadDB(){
     const sqlPromise = initSqlJs();
-    const dataPromise = fetch("../assets/data/DigiChronicles.db").then(res => res.arrayBuffer());
+    const dataPromise = fetch("./assets/data/DigiChronicles.db").then(res => res.arrayBuffer());
     const [SQL, buf] = await Promise.all([sqlPromise, dataPromise]);
     db = new SQL.Database(new Uint8Array(buf));
     listPlayers();
-    getPlayedTournaments()
+    getPlayedTournaments();
+    getPlayedColors();
 }
 
 function listPlayers(){
@@ -31,7 +34,8 @@ function changePlayer(){
     const playerName = document.getElementById("playerName");
     player = playerselect.value;
     playerName.textContent = playerselect.options[playerselect.selectedIndex].text;
-    getPlayedTournaments()
+    getPlayedTournaments();
+    getPlayedColors();
 }
 
 function getPlayedTournaments(){
@@ -56,4 +60,29 @@ function getPlayedTournaments(){
     var appearance = 100/totalTournamentCount*playedTournamentCount;
     appearanceRate.textContent = "Appearance Rate: " + appearance.toPrecision(4) + "%";
     totalstmt.free();
+}
+
+function getPlayedColors(){
+    playedColors = [];
+    deckColors.forEach(color => { 
+        const colorstmt = db.prepare(
+            "SELECT deckID FROM decks WHERE color LIKE '%" + color + "%'"
+        );
+        var colorDecks = [];
+        while (colorstmt.step()) {
+            colorDecks.push(colorstmt.get()[0]);
+        }
+        var colorCount = 0;
+        colorDecks.forEach(deck => {
+            const deckstmt = db.prepare(
+                "SELECT * FROM results WHERE deck=" + deck + " AND player=" + player
+            );
+            while (deckstmt.step()) {
+                colorCount+=1;
+            }
+            deckstmt.free();
+        });
+        playedColors.push(colorCount);
+        colorstmt.free();
+    });
 }
