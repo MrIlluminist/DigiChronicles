@@ -10,6 +10,8 @@
     <!-- Style -->
     <link rel="stylesheet" href="./assets/css/reset.css">
     <link rel="stylesheet" href="./assets/css/style.css">
+    <script src="js/sql.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <nav>        
@@ -18,12 +20,30 @@
         </div>
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
-            <li><a href="packs.html">Packs</a></li>
             <li><a href="decks.html">Decks</a></li>
             <li><a href="players.html">Players</a></li>
             <li><a href="tournament.html">Most Recent Tournament</a></li>
             <li><a href="https://youtu.be/dQw4w9WgXcQ" target="_blank">Explore</a></li>
         </ul>
     </nav>
+    <div id="headerdiv" class="horizontaldiv">
+        <select id="playerselect" onchange="changePlayer()"></select>
+        <div id="playerName"></div>
+    </div>
+    <div id="statdiv" class="horizontaldiv">
+        <div id="stats" class="verticaldiv">
+            <div id="playedTournaments"></div>
+            <div id="appearanceRate"></div>
+            <canvas id="colorChart"></canvas>            
+        </div>
+        <div id="decks" class="verticaldiv">
+            <div>Most Played Decks</div>
+        </div>
+        <canvas id="winrateChart"></canvas>
+    </div>
+    <div id="packdiv">
+        <canvas id="packChart"></canvas>
+    </div>
+    <script src="js/players.js"></script>
 </body>
 </html>

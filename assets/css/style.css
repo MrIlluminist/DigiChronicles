@@ -50,3 +50,15 @@ nav {
 .nav-links a:hover {
     background-color: #641ec7
 }
+
+.verticaldiv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.horizontaldiv {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
