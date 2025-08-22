@@ -21,6 +21,7 @@ async function loadDB(){
     listPlayers();
     getPlayedTournaments();
     getPlayedColors();
+    getMostPlayedDecks();
     getWinrate();
     getPacks();
 }
@@ -48,6 +49,7 @@ function changePlayer(){
     playerName.textContent = playerselect.options[playerselect.selectedIndex].text;
     getPlayedTournaments();
     getPlayedColors();
+    getMostPlayedDecks();
     getWinrate();
     getPacks();
 }
@@ -129,6 +131,117 @@ function getPlayedColors(){
             }]
         }
     })
+}
+
+function getMostPlayedDecks(){
+    const deck1Label = document.getElementById("deck1");
+    const deck2Label = document.getElementById("deck2");
+    const deck3Label = document.getElementById("deck3");
+
+    const mostPlayedDeckstmt = db.prepare(
+        "SELECT deck FROM results WHERE player=" + player
+    );
+    var playedDecks = [];
+    var playedDecksCount = [];
+    while (mostPlayedDeckstmt.step()) {
+        var playedDeck = 0;
+        playedDeck = mostPlayedDeckstmt.get()[0];
+        if (!playedDecks.includes(playedDeck)) {
+            playedDecks.push(playedDeck);
+            playedDecksCount.push(0);
+        }
+        var index;
+        index = playedDecks.indexOf(playedDeck);
+        playedDecksCount[index] += 1;
+    }
+    mostPlayedDeckstmt.free();
+
+    var mostplayedDecks = [];
+    for (let i = 0; i < 3; i++) {
+        var mostTournaments = 0;
+        playedDecksCount.forEach(count => {
+            if (count > mostTournaments) {
+                mostTournaments = count;
+            }
+        });
+        var deckIndex = playedDecksCount.indexOf(mostTournaments);
+        if (mostTournaments != 0) {
+            mostplayedDecks.push(playedDecks[deckIndex]);
+        }
+        else{
+            mostplayedDecks.push(-1);
+        }
+        playedDecksCount.splice(deckIndex, 1);
+        playedDecks.splice(deckIndex, 1);
+    };
+
+    var deck1Name = getDeckName(mostplayedDecks[0]);
+    var deck2Name = getDeckName(mostplayedDecks[1]);;
+    var deck3Name = getDeckName(mostplayedDecks[2]);;
+    deck1Label.textContent = "";
+    deck2Label.textContent = "";
+    deck3Label.textContent = "";
+    if (mostplayedDecks[0] != -1) {
+        deck1Label.textContent = deck1Name + " Winrate: " + getDeckWinrate(mostplayedDecks[0]) + "% Tournaments: " + getTournamentsPlayedwithDeck(mostplayedDecks[0]);
+    }
+    if (mostplayedDecks[1] != -1) {
+        deck2Label.textContent = deck2Name + " Winrate: " + getDeckWinrate(mostplayedDecks[1]) + "% Tournaments: " + getTournamentsPlayedwithDeck(mostplayedDecks[1]);
+    }
+    if (mostplayedDecks[2] != -1) {
+        deck3Label.textContent = deck3Name + " Winrate: " + getDeckWinrate(mostplayedDecks[2]) + "% Tournaments: " + getTournamentsPlayedwithDeck(mostplayedDecks[2]);
+    }
+}
+
+function getDeckName(deckID){
+    const deckstmt = db.prepare(
+        "SELECT name FROM decks WHERE deckID=" + deckID
+    );
+    var deckName;
+    while (deckstmt.step()) {
+            deckName = deckstmt.get()[0];
+    }
+    deckstmt.free();
+    return deckName;
+}
+
+function getDeckWinrate(deckID){
+    const deckwrstmt = db.prepare(
+        "SELECT wins, draws, losses FROM results WHERE deck=" + deckID + " AND player=" + player
+    );
+    var wins = 0;
+    var draws = 0;
+    var losses = 0;
+    var totalGames = 0;
+    while (deckwrstmt.step()) {
+        wins += deckwrstmt.get()[0];
+        draws += deckwrstmt.get()[1];
+        losses += deckwrstmt.get()[2];
+    }
+    deckwrstmt.free();
+    totalGames = wins + draws + losses;
+    var winrate;
+    winrate = 100/totalGames*wins;
+    if (winrate %1 == 0) {
+    }
+    else if (winrate >= 10) {
+        winrate = winrate.toPrecision(4);
+    }
+    else{
+        winrate = winrate.toPrecision(3);
+    }
+    return winrate;
+}
+
+function getTournamentsPlayedwithDeck(deckID){
+    const deckstmt = db.prepare(
+        "SELECT tournament FROM results WHERE deck=" + deckID + " AND player=" + player
+    );
+    var tournamentsPlayed = 0;
+    while (deckstmt.step()) {
+        tournamentsPlayed++;
+    }
+    deckstmt.free();
+    return tournamentsPlayed;
 }
 
 function getWinrate(){
