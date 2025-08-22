@@ -72,7 +72,15 @@ function getPlayedTournaments(){
         totalTournamentCount+=1;
     }
     var appearance = 100/totalTournamentCount*playedTournamentCount;
-    appearanceRate.textContent = "Appearance Rate: " + appearance.toPrecision(4) + "%";
+    if (appearance %1 == 0) {
+    }
+    else if (appearance >= 10) {
+        appearance = appearance.toPrecision(4);
+    }
+    else{
+        appearance = appearance.toPrecision(3);
+    }
+    appearanceRate.textContent = "Appearance Rate: " + appearance + "%";
     totalstmt.free();
 }
 
@@ -162,6 +170,20 @@ function getWinrate(){
             }]
         }
     })
+
+    const winrateLabel = document.getElementById("winrate");
+    var winrate = 0;
+    var totalGames = wins + draws + losses;
+    winrate = 100/totalGames*wins;
+    if (winrate %1 == 0) {
+    }
+    else if (winrate >= 10) {
+        winrate = winrate.toPrecision(4);
+    }
+    else{
+        winrate = winrate.toPrecision(3);
+    }
+    winrateLabel.textContent = "Winrate: " + winrate + "%";
 }
 
 function getPacks(){
@@ -172,6 +194,7 @@ function getPacks(){
     while (packstmt.step()) {
             packs[0] = packstmt.get()[0];
     }
+    packstmt.free();
 
     const packchart = document.getElementById("packChart");
     packchart.value = 0;
