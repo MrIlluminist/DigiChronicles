@@ -1,7 +1,9 @@
 var db = null;
 var player = 1;
 const deckColors = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Purple', 'White', 'Multicolor'];
+var deckColorCodes = ['#e7012c', '#0195dd', '#fce100', '#009c6a', '#211617', '#6457a7', '#ffffff', '#ff99cc'];
 var playedColors = [];
+var playedColorChart = null;
 loadDB();
 async function loadDB(){
     const sqlPromise = initSqlJs();
@@ -62,6 +64,22 @@ function getPlayedTournaments(){
     totalstmt.free();
 }
 
+function initializeCharts(){
+    const colorchart = document.getElementById("colorChart");
+    colorchart.value = 0;
+    playedColorChart = new Chart(colorchart,{
+        type: 'bar',
+        data:{
+            labels: deckColors,
+            datasets: [{
+                label: 'Tournaments played',
+                data: playedColors,
+                backgroundColor: deckColorCodes
+            }]
+        }
+    })
+}
+
 function getPlayedColors(){
     playedColors = [];
     deckColors.forEach(color => { 
@@ -85,4 +103,26 @@ function getPlayedColors(){
         playedColors.push(colorCount);
         colorstmt.free();
     });
+    const colorchart = document.getElementById("colorChart");
+    colorchart.value = 0;
+    if (playedColorChart != null) {
+        playedColorChart.destroy();
+    }
+    playedColorChart = new Chart(colorchart,{
+        type: 'polarArea',
+        options: {
+            title: {
+                text: 'Decks played by color',
+                display: true
+            }
+        },
+        data:{
+            labels: deckColors,
+            datasets: [{
+                label: 'Tournaments played',
+                data: playedColors,
+                backgroundColor: deckColorCodes
+            }]
+        }
+    })
 }
