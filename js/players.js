@@ -1,9 +1,13 @@
 var db = null;
 var player = 1;
 const deckColors = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Purple', 'White', 'Multicolor'];
+const winrateColors = ['Wins', 'Draws', 'Losses'];
 var deckColorCodes = ['#e7012c', '#0195dd', '#fce100', '#009c6a', '#211617', '#6457a7', '#ffffff', '#ff99cc'];
+var winrateColorCodes = ['#009c6a', '#fce100', '#e7012c'];
 var playedColors = [];
+var winsDrawsLosses = [0, 0, 0];
 var playedColorChart = null;
+var winrateChart = null;
 loadDB();
 async function loadDB(){
     const sqlPromise = initSqlJs();
@@ -13,6 +17,7 @@ async function loadDB(){
     listPlayers();
     getPlayedTournaments();
     getPlayedColors();
+    getWinrate();
 }
 
 function listPlayers(){
@@ -38,6 +43,7 @@ function changePlayer(){
     playerName.textContent = playerselect.options[playerselect.selectedIndex].text;
     getPlayedTournaments();
     getPlayedColors();
+    getWinrate();
 }
 
 function getPlayedTournaments(){
@@ -62,22 +68,6 @@ function getPlayedTournaments(){
     var appearance = 100/totalTournamentCount*playedTournamentCount;
     appearanceRate.textContent = "Appearance Rate: " + appearance.toPrecision(4) + "%";
     totalstmt.free();
-}
-
-function initializeCharts(){
-    const colorchart = document.getElementById("colorChart");
-    colorchart.value = 0;
-    playedColorChart = new Chart(colorchart,{
-        type: 'bar',
-        data:{
-            labels: deckColors,
-            datasets: [{
-                label: 'Tournaments played',
-                data: playedColors,
-                backgroundColor: deckColorCodes
-            }]
-        }
-    })
 }
 
 function getPlayedColors(){
@@ -122,6 +112,47 @@ function getPlayedColors(){
                 label: 'Tournaments played',
                 data: playedColors,
                 backgroundColor: deckColorCodes
+            }]
+        }
+    })
+}
+
+function getWinrate(){
+    winsDrawsLosses = [0, 0, 0];
+    var wins = 0;
+    var draws = 0;
+    var losses = 0;
+    const resultstmt = db.prepare(
+        "SELECT wins, draws, losses FROM results WHERE player=" + player
+    );
+    while (resultstmt.step()) {
+            wins += resultstmt.get()[0];
+            draws += resultstmt.get()[1];
+            losses += resultstmt.get()[2];
+    }
+    resultstmt.free();
+    winsDrawsLosses[0] = wins;
+    winsDrawsLosses[1] = draws;
+    winsDrawsLosses[2] = losses;
+
+    const winratechart = document.getElementById("winrateChart");
+    winratechart.value = 0;
+    if (winrateChart != null) {
+        winrateChart.destroy();
+    }
+    winrateChart = new Chart(winratechart,{
+        type: 'doughnut',
+        options: {
+            title: {
+                text: 'Overall Winrate',
+                display: true
+            }
+        },
+        data:{
+            labels: winrateColors,
+            datasets: [{
+                data: winsDrawsLosses,
+                backgroundColor: winrateColorCodes
             }]
         }
     })
