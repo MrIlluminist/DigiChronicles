@@ -2,12 +2,16 @@ var db = null;
 var player = 1;
 const deckColors = ['Red', 'Blue', 'Yellow', 'Green', 'Black', 'Purple', 'White', 'Multicolor'];
 const winrateColors = ['Wins', 'Draws', 'Losses'];
+const packLabels = ['Packs', 'Display'];
 var deckColorCodes = ['#e7012c', '#0195dd', '#fce100', '#009c6a', '#211617', '#6457a7', '#ffffff', '#ff99cc'];
 var winrateColorCodes = ['#009c6a', '#fce100', '#e7012c'];
+var packColorCodes = ['#a4ff80ff', '#6d77fdff'];
 var playedColors = [];
 var winsDrawsLosses = [0, 0, 0];
+var packs = [0, 24];
 var playedColorChart = null;
 var winrateChart = null;
+var packChart = null;
 loadDB();
 async function loadDB(){
     const sqlPromise = initSqlJs();
@@ -18,6 +22,7 @@ async function loadDB(){
     getPlayedTournaments();
     getPlayedColors();
     getWinrate();
+    getPacks();
 }
 
 function listPlayers(){
@@ -44,6 +49,7 @@ function changePlayer(){
     getPlayedTournaments();
     getPlayedColors();
     getWinrate();
+    getPacks();
 }
 
 function getPlayedTournaments(){
@@ -153,6 +159,39 @@ function getWinrate(){
             datasets: [{
                 data: winsDrawsLosses,
                 backgroundColor: winrateColorCodes
+            }]
+        }
+    })
+}
+
+function getPacks(){
+    packs = [0, 24];
+    const packstmt = db.prepare(
+        "SELECT savedPacks FROM players WHERE playerID=" + player
+    );
+    while (packstmt.step()) {
+            packs[0] = packstmt.get()[0];
+    }
+
+    const packchart = document.getElementById("packChart");
+    packchart.value = 0;
+    if (packChart != null) {
+        packChart.destroy();
+    }
+    packChart = new Chart(packchart,{
+        type: 'bar',
+        options: {
+            title: {
+                text: 'Saved Packs',
+                display: true
+            }
+        },
+        data:{
+            labels: packLabels,
+            datasets: [{
+                label: 'Saved Packs',
+                data: packs,
+                backgroundColor: packColorCodes
             }]
         }
     })
