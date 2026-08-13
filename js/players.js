@@ -23,7 +23,6 @@ async function loadDB(){
     getPlayedColors();
     getMostPlayedDecks();
     getWinrate();
-    getPacks();
 }
 
 function listPlayers(){
@@ -297,38 +296,4 @@ function getWinrate(){
         winrate = winrate.toPrecision(3);
     }
     winrateLabel.textContent = "Winrate: " + winrate + "%";
-}
-
-function getPacks(){
-    packs = [0, 24];
-    const packstmt = db.prepare(
-        "SELECT savedPacks FROM players WHERE playerID=" + player
-    );
-    while (packstmt.step()) {
-            packs[0] = packstmt.get()[0];
-    }
-    packstmt.free();
-
-    const packchart = document.getElementById("packChart");
-    packchart.value = 0;
-    if (packChart != null) {
-        packChart.destroy();
-    }
-    packChart = new Chart(packchart,{
-        type: 'bar',
-        options: {
-            title: {
-                text: 'Saved Packs',
-                display: true
-            }
-        },
-        data:{
-            labels: packLabels,
-            datasets: [{
-                label: 'Saved Packs',
-                data: packs,
-                backgroundColor: packColorCodes
-            }]
-        }
-    })
 }
